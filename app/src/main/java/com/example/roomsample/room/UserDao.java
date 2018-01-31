@@ -6,7 +6,6 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
-import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 
 /**
@@ -22,8 +21,10 @@ public interface UserDao {
      * @return
      */
     //Flowable or observable is used to emits Student model types of data and it emits whenever database is updated
-    @Query("SELECT * FROM users")
-    Flowable<List<User>> getUsers();
+//    @Query("SELECT * FROM users")
+//    Flowable<List<User>> getUsers();
+
+
 
     /**
      * This Maybe class is used to emit only a single row data
@@ -34,9 +35,11 @@ public interface UserDao {
     @Query("SELECT * FROM users WHERE id =:id")
     Maybe<User> getUserById(int id);
 
+    @Query("SELECT * FROM users")
+    Maybe<List<User>> getAllUsers();
 
     @Insert
-    void insertStudent(User user);
+    long insertStudent(User user);
 
     @Query("DELETE FROM users")
     void deleteAllUsers();

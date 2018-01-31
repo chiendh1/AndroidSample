@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -17,17 +16,15 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Chiendh on 1/31/2018.
  */
 
-public class RoomSampleActivity extends AppCompatActivity {
+public class RoomSampleActivity extends AppCompatActivity implements OnItemClickListener {
 
     @BindView(R.id.etName)
     EditText etName;
@@ -52,12 +49,12 @@ public class RoomSampleActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
         rvUser.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new UserAdapter(this, users);
+        adapter = new UserAdapter(this, users, this);
         rvUser.setAdapter(adapter);
     }
 
     private void getAllUsers() {
-        UserDatabase.getInstance(this).getUserDao().getUsers()
+        UserDatabase.getInstance(this).getUserDao().getAllUsers()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(users -> {
@@ -84,24 +81,34 @@ public class RoomSampleActivity extends AppCompatActivity {
     }
 
     private void addUser(User user) {
-        Completable.fromAction(() -> UserDatabase.getInstance(RoomSampleActivity.this).getUserDao().insertStudent(user))
+        Observable.fromCallable(() -> UserDatabase.getInstance(RoomSampleActivity.this).getUserDao().insertStudent(user)).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new CompletableObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
+                .subscribe(id -> {
+                    onAddUserSuccess(user, id);
+                });
+    }
 
-            }
+    private void onAddUserSuccess(User user, Long id) {
+        resetUI();
+        user.setId(id);
+        addUserToBottom(user);
+    }
 
-            @Override
-            public void onComplete() {
-                Log.d("CHIEN", "onComplete");
-            }
+    private void resetUI() {
+        etName.setText("");
+        etEmail.setText("");
+    }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.d("CHIEN", "onError");
-            }
-        });
+    private void addUserToBottom(User user) {
+        users.add(user);
+        adapter.notifyDataSetChanged();
+        rvUser.scrollToPosition(users.size()-1);
+    }
+
+    @Override
+    public void onClicked(int position) {
+        User user = users.get(position);
+        etName.setText(user.getName());
+        etEmail.setText(user.getEmail() );
     }
 }

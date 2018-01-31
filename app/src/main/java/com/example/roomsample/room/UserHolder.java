@@ -21,9 +21,13 @@ public class UserHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.tvEmail)
     TextView tvEmail;
 
-    public UserHolder(View itemView) {
+    public UserHolder(View itemView, OnItemClickListener listener) {
         super(itemView);
         ButterKnife.bind(this, itemView);
+
+        itemView.setOnClickListener(()->{
+            listener.onClicked(getAdapterPosition());
+        });
     }
 
     public void bindView(User user) {

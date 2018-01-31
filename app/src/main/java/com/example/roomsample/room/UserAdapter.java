@@ -19,10 +19,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserHolder> {
     private Context context;
     private List<User> users;
     private LayoutInflater inflater;
+    private OnItemClickListener listener;
 
-    public UserAdapter(Context context, List<User> users) {
+    public UserAdapter(Context context, List<User> users, OnItemClickListener listener) {
         this.context = context;
         this.users = users;
+        this.listener = listener;
         inflater = LayoutInflater.from(context);
     }
 
